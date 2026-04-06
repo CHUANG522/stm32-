@@ -1,10 +1,10 @@
 #include "fun.h"
-uint8_t lcd_page = 2;
+uint8_t lcd_page ;
 uint8_t data_R;                                       // 数据接收
 uint32_t time_usart1;                                 // 滴答定时器记录usart1时间
-uint8_t B_current[3];                                 // 当前密码
+int8_t B_current[3]={-1,-1,-1};                                 // 当前密码
 uint8_t B_current_ture[3] = {1, 2, 3};                // 正确密码
-uint8_t test_flag, led_flag, true_flag, false_flag_3; // text=1开始校验，led闪烁，true=1判断密码正确，false=1输入三次都错
+uint8_t test_flag, led_flag, true_flag, false_flag_3,B_flag[3]={0}; // text=1开始校验，led闪烁，true=1判断密码正确，false=1输入三次都错
 uint32_t time_CCR, time_led;                          // CCR记录输出CCR时的时间，led闪烁时间
 uint8_t counter_test, counter_led;                    // test输入错误次数，led闪烁次数
 
@@ -35,18 +35,21 @@ void key_scan(void)
     {
         if (lcd_page == 0) // 注意这里不要依赖使用逻辑反！lcd_page，有三个界面不宜使用
             B_current[0]++;
+		B_flag[0]=1;
     }
 
     if (!B2_statu & B2_last)
     {
         if (lcd_page == 0)
             B_current[1]++;
+		B_flag[1]=1;
     }
 
     if (!B3_statu & B3_last)
     {
         if (lcd_page == 0)
             B_current[2]++;
+		B_flag[2]=1;
     }
 
     if (!B4_statu & B4_last)
@@ -54,11 +57,11 @@ void key_scan(void)
         test_flag = 1;
 
     } // 输错回正部分
-    if (lcd_page == 2)
-    { // 当在第三个界面时按下任意键回到输入界面
-        if ((!B1_statu & B1_last) || (!B2_statu & B2_last) || (!B3_statu & B3_last))
-            lcd_page = 0;
-    }
+   // if (lcd_page == 2)
+  //  { // 当在第三个界面时按下任意键回到输入界面
+   //     if ((!B1_statu & B1_last) || (!B2_statu & B2_last) || (!B3_statu & B3_last))
+     //       lcd_page = 0;
+   // }
     B1_last = B1_statu;
     B2_last = B2_statu;
     B3_last = B3_statu;
@@ -84,14 +87,22 @@ void lcd_show(void)
     {
         sprintf(string, "       PSD         ");
         LCD_DisplayStringLine(Line1, (uint8_t *)string);
-
+         if(B_flag[0])
         sprintf(string, "    B1:%d          ", B_current[0]);
+		 else
+		 			 
+		 sprintf(string, "    B1:@           ");
+			
         LCD_DisplayStringLine(Line3, (uint8_t *)string);
-
+         if(B_flag[1])
         sprintf(string, "    B2:%d          ", B_current[1]);
+		 else 
+		 sprintf(string, "    B2:@           ");
         LCD_DisplayStringLine(Line4, (uint8_t *)string);
-
+         if(B_flag[2])
         sprintf(string, "    B3:%d          ", B_current[2]);
+		 else 
+		 sprintf(string, "    B3:@           ");
         LCD_DisplayStringLine(Line5, (uint8_t *)string);
     }
     if (lcd_page == 1) // 输出界面
@@ -105,20 +116,20 @@ void lcd_show(void)
         sprintf(string, "    D:%d%%         ", TIM2->CCR2);
         LCD_DisplayStringLine(Line4, (uint8_t *)string);
     }
-    if (lcd_page == 2) // 输入错误界面
-    {
-        sprintf(string, "       PSD         ");
-        LCD_DisplayStringLine(Line1, (uint8_t *)string);
+  //  if (lcd_page == 2) // 输入错误界面
+  //  {
+   //     sprintf(string, "       PSD         ");
+   //     LCD_DisplayStringLine(Line1, (uint8_t *)string);
+//
+    //    sprintf(string, "    B1:@          ");
+    //    LCD_DisplayStringLine(Line3, (uint8_t *)string);
 
-        sprintf(string, "    B1:@          ");
-        LCD_DisplayStringLine(Line3, (uint8_t *)string);
+    //    sprintf(string, "    B2:@          ");
+    //    LCD_DisplayStringLine(Line4, (uint8_t *)string);
 
-        sprintf(string, "    B2:@          ");
-        LCD_DisplayStringLine(Line4, (uint8_t *)string);
-
-        sprintf(string, "    B3:@          ");
-        LCD_DisplayStringLine(Line5, (uint8_t *)string);
-    }
+    //    sprintf(string, "    B3:@          ");
+     //   LCD_DisplayStringLine(Line5, (uint8_t *)string);
+   // }
 }
 uint8_t string_R[20];
 uint8_t counter_R, flag_R; // counter接收字符数，flag=1接收字符
@@ -172,7 +183,9 @@ void data_proc(void)
         else
         {
             true_flag = 0;
-            lcd_page = 2;
+           // lcd_page = 2;
+			memset(B_flag,0,3);
+			memset(B_current,-1,3);
             counter_test++;
             if (counter_test >= 3)
             {
@@ -180,10 +193,12 @@ void data_proc(void)
                 false_flag_3 = 1;
                 // 记得增变量及时清零
                 counter_test = 0;
-                lcd_page = 2;
+             //   lcd_page = 2;
+				memset(B_flag,0,3);
+				memset(B_current,-1,3);
             }
         }
-        memset(B_current, 0, 3);
+       
         test_flag = 0;
     }
 
@@ -201,17 +216,19 @@ void data_proc(void)
             }
             else
             {
-                lcd_page = 2;
+                lcd_page = 0;
+				memset(B_flag,0,3);
+				memset(B_current,-1,3);
                 TIM2->CCR2 = 100;
                 TIM2->PSC = 800 - 1;
-                led_show(1, 0);
-                led_show(8, (lcd_page - 1) ^ 1);
+                 led_show(1, 0);       
                 true_flag = 0; // 思考为什么不能放在200或211(尾)
             } // 这里如果放在202或214，因为tim_CCR是从0开始增，即提前把这个仅执行一次的部分终止了，根本不会执行到else部分
         }
     }
 
     // 错误三次处理
+	
 }
 void main_proc(void)
 {
