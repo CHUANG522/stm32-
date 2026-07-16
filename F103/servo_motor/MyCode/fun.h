@@ -2,15 +2,12 @@
 #define _FUN_H
 #include "Header.h"
 
-void function(void);//此函数在main中循环
+void function(void); // 此函数在main中循环
 void OLED_show(void);
+void set_servo_angle(float angle);
 
-
-
-//全局变量
+// 全局变量
 extern uint32_t time_OLED;
 extern uint32_t time;
-
-
 
 #endif
