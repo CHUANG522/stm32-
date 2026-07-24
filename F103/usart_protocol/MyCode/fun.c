@@ -25,7 +25,6 @@ void USART_show(void)
 		return; // 1秒发送一次数据
 	time_USART = 0;
 
-	// sprintf((char *)USART_buff, "nbkls\r\n");
-
-	// send_string_dma(USART_buff);
+	 sprintf((char *)USART_buff, "hello\r\n");
+	 send_string_dma(USART_buff);
 }

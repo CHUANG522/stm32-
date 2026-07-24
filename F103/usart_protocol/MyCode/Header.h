@@ -17,5 +17,6 @@
 #include "OLED.h"
 #include "fun.h"
 #include "bsp_usart.h"
+#include "protocol.h"
 
 #endif
