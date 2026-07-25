@@ -1,6 +1,3 @@
-#ifndef _PROTOCOL_H
-#define _PROTOCOL_H
+#pragma once
 
 #include "Header.h"
-
-#endif

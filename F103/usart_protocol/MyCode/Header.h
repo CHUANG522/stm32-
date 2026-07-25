@@ -1,5 +1,5 @@
-#ifndef _HEADER_H
-#define _HEADER_H
+#pragma once
+
 // 基础头文件
 #include <stdio.h>
 #include <stdint.h>
@@ -19,4 +19,5 @@
 #include "bsp_usart.h"
 #include "protocol.h"
 
-#endif
+
+

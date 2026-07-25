@@ -1,5 +1,5 @@
-#ifndef _FUN_H
-#define _FUN_H
+#pragma once
+
 #include "Header.h"
 
 void function(void); // 此函数在main中循环
@@ -9,4 +9,4 @@ void USART_show(void);
 extern uint32_t time_OLED;
 extern uint32_t time_USART;
 
-#endif
+
